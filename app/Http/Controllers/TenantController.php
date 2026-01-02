@@ -20,7 +20,20 @@ class TenantController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $tenants = $user->ownedTenants()->latest()->paginate(10);
+
+        // Get tenant IDs where user is owner
+        $ownedTenantIds = $user->ownedTenants()->pluck('id');
+
+        // Get tenant IDs where user is member/admin
+        $associatedTenantIds = $user->tenants()->pluck('tenants.id');
+
+        $allTenantIds = $ownedTenantIds->merge($associatedTenantIds)->unique();
+
+        // Get all tenants
+        $tenants = Tenant::whereIn('id', $allTenantIds)
+            ->latest()
+            ->paginate(10);
+
         return view('tenants.index', compact('tenants'));
     }
 

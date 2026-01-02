@@ -5,9 +5,21 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $tenant->name }}</h1>
         <div class="flex gap-2">
-            <a href="{{ route('tenants.edit', $tenant) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
-                Editar
-            </a>
+            @php
+                $user = Auth::user();
+                $canManageUsers = $tenant->canManageUsers($user);
+                $canUpdate = $tenant->isOwner($user);
+            @endphp
+            @if($canManageUsers)
+                <a href="{{ route('tenants.users.index', $tenant) }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">
+                    Utilizadores
+                </a>
+            @endif
+            @if($canUpdate)
+                <a href="{{ route('tenants.edit', $tenant) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
+                    Editar
+                </a>
+            @endif
             <a href="{{ route('tenants.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
                 Voltar
             </a>
