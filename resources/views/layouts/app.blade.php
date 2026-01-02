@@ -16,19 +16,13 @@
                 </div>
                 <div class="flex items-center gap-4">
                     @auth
-                        <div class="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <span class="text-gray-700 dark:text-gray-300 font-medium">
-                                {{ Auth::user()->name }}
-                            </span>
-                        </div>
+                        <tenant-switcher />
                         <a href="{{ route('tenants.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Tenants</a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Logout</button>
-                        </form>
+                        <div id="user-menu-container" data-user-name="{{ Auth::user()->name }}">
+                            <script>
+                                window.currentUserName = "{{ Auth::user()->name }}";
+                            </script>
+                        </div>
                     @endauth
                 </div>
             </div>
@@ -66,5 +60,6 @@
             });
         });
     </script>
+    <div id="vue-app-container"></div>
 </body>
 </html>
