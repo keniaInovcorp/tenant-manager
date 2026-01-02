@@ -114,13 +114,20 @@ class TenantController extends Controller
             'domain' => 'nullable|string|max:255|unique:tenants,domain,' . $tenant->id,
             'description' => 'nullable|string|max:1000',
             'is_active' => 'sometimes|boolean',
+            'primary_color' => 'nullable|string|max:7',
         ]);
 
         $validated['is_active'] = $request->has('is_active') && $request->is_active == '1';
 
+        if ($request->has('primary_color')) {
+            $settings = $tenant->settings ?? [];
+            $settings['branding']['primary_color'] = $request->primary_color;
+            $validated['settings'] = $settings;
+        }
+
         $tenant->update($validated);
 
-        return redirect()->route('tenants.index')
+        return redirect()->route('tenants.show', $tenant)
             ->with('success', 'Tenant atualizado com sucesso!');
     }
 }

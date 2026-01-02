@@ -53,7 +53,7 @@
 
         <div class="border-t border-gray-700 mt-2 pt-2">
           <a
-            :href="'/tenants/create'"
+            :href="'/tenants/onboarding'"
             class="block w-full px-3 py-2 text-left text-sm text-white hover:bg-gray-700 rounded-md transition-colors"
           >
             + Criar Novo Tenant

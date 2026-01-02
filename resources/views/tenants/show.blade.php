@@ -49,9 +49,20 @@
             </div>
             @endif
             <div>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Cor Principal</dt>
+                <dd class="mt-1">
+                    <div class="flex items-center gap-2">
+                        <div class="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600" 
+                             style="background-color: {{ $tenant->settings['branding']['primary_color'] ?? '#3B82F6' }}">
+                        </div>
+                        <span class="text-sm text-gray-900 dark:text-white font-mono">{{ $tenant->settings['branding']['primary_color'] ?? '#3B82F6' }}</span>
+                    </div>
+                </dd>
+            </div>
+            <div>
                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado</dt>
                 <dd class="mt-1">
-                    <span class="px-2 py-1 text-xs rounded-full {{ $tenant->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                    <span class="px-2 py-1 text-xs rounded-full {{ $tenant->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' }}">
                         {{ $tenant->is_active ? 'Ativo' : 'Inativo' }}
                     </span>
                 </dd>

@@ -40,6 +40,20 @@
             </div>
 
             <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Cor Principal
+                </label>
+                <div class="flex items-center gap-3">
+                    <input type="color" name="primary_color" value="{{ old('primary_color', $tenant->settings['branding']['primary_color'] ?? '#3B82F6') }}"
+                           class="h-10 w-20 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Cor usada para branding do tenant</span>
+                </div>
+                @error('primary_color')
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="mb-6">
                 <label class="flex items-center">
                     <input type="checkbox" name="is_active" value="1" {{ old('is_active', $tenant->is_active) ? 'checked' : '' }}
                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
@@ -48,10 +62,10 @@
             </div>
 
             <div class="flex gap-4">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
                     Atualizar Tenant
                 </button>
-                <a href="{{ route('tenants.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
+                <a href="{{ route('tenants.show', $tenant) }}" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white px-4 py-2 rounded-lg transition-colors">
                     Cancelar
                 </a>
             </div>

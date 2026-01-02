@@ -103,12 +103,8 @@ function mountComponents() {
 
         // Mount Vue component
         if (!userMenuElement.__vue_app__) {
-            try {
-                const app = createApp(UserMenu, { userName });
-                app.mount(userMenuElement);
-            } catch (error) {
-                console.error('Error mounting UserMenu:', error);
-            }
+            const app = createApp(UserMenu, { userName });
+            app.mount(userMenuElement);
         }
     }
 
