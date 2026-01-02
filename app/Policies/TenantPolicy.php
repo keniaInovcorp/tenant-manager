@@ -56,8 +56,20 @@ class TenantPolicy
      */
     public function update(User $user, Tenant $tenant): bool
     {
-        // Only owner can update tenant settings
-        return $tenant->owner_id === $user->id;
+        return $tenant->isOwner($user) ||
+               ($tenant->hasUser($user) && $tenant->users()->where('user_id', $user->id)->first()?->pivot->role === 'admin');
+    }
+
+    /**
+     * Determine whether the user can delete the tenant.
+     *
+     * @param User $user
+     * @param Tenant $tenant
+     * @return bool
+     */
+    public function delete(User $user, Tenant $tenant): bool
+    {
+        return $tenant->isOwner($user);
     }
 
     /**

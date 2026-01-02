@@ -137,4 +137,28 @@ class Tenant extends Model
         $role = $this->getUserRole($user);
         return in_array($role, ['owner', 'admin']);
     }
+
+    /**
+     * Check if a user has a specific permission for this tenant.
+     *
+     * @param User $user
+     * @param string $permission
+     * @return bool
+     */
+    public function hasPermission(User $user, string $permission): bool
+    {
+        if ($this->isOwner($user)) {
+            return true;
+        }
+
+        $pivot = $this->users()->where('user_id', $user->id)->first()?->pivot;
+
+        if (!$pivot) {
+            return false;
+        }
+
+        $permissions = $pivot->permissions ?? [];
+
+        return in_array('*', $permissions) || in_array($permission, $permissions);
+    }
 }
