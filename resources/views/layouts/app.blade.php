@@ -11,13 +11,19 @@
     <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
-                <div class="flex items-center">
+                <div class="flex items-center gap-8">
                     <a href="/" class="text-xl font-bold text-gray-900 dark:text-white">Tenant Manager</a>
+                    @auth
+                        <div class="flex items-center gap-6 pl-8">
+                            <a href="{{ route('tenants.index') }}" class="text-gray-700 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
+                                Tenants
+                            </a>
+                        </div>
+                    @endauth
                 </div>
                 <div class="flex items-center gap-4">
                     @auth
                         <tenant-switcher />
-                        <a href="{{ route('tenants.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Tenants</a>
                         <div id="user-menu-container" data-user-name="{{ Auth::user()->name }}">
                             <script>
                                 window.currentUserName = "{{ Auth::user()->name }}";

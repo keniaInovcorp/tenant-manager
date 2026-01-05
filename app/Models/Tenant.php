@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Tenant extends Model
@@ -160,5 +161,25 @@ class Tenant extends Model
         $permissions = $pivot->permissions ?? [];
 
         return in_array('*', $permissions) || in_array($permission, $permissions);
+    }
+
+    /**
+     * Get the active subscription for this tenant.
+     *
+     * @return HasOne
+     */
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)->where('status', 'active')->latest();
+    }
+
+    /**
+     * Get the current plan for this tenant.
+     *
+     * @return Plan|null
+     */
+    public function currentPlan(): ?Plan
+    {
+        return $this->subscription?->plan;
     }
 }
