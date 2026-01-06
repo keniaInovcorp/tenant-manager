@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\TenantOnboardingController;
@@ -16,8 +17,10 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/home', function () {
-        return redirect()->route('tenants.index');
+        return redirect()->route('dashboard');
     })->name('home');
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('tenants')->group(function () {
         Route::get('/onboarding', [TenantOnboardingController::class, 'show'])->name('tenants.onboarding');
