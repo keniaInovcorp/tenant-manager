@@ -182,4 +182,50 @@ class Tenant extends Model
     {
         return $this->subscription?->plan;
     }
+
+    /**
+     * Check if the tenant can add more users based on plan limits.
+     *
+     * @return bool
+     */
+    public function canAddUsers(): bool
+    {
+        $plan = $this->currentPlan();
+        if (!$plan) {
+            return false;
+        }
+
+        $userLimit = $plan->getLimit('users');
+        if ($userLimit === -1) {
+            return true;
+        }
+
+        $currentUserCount = $this->users()->count();
+        return $currentUserCount < $userLimit;
+    }
+
+    /**
+     * Check if the tenant's current usage is compatible with a new plan.
+     *
+     * @param Plan $newPlan
+     * @return array ['compatible' => bool, 'issues' => array]
+     */
+    public function isCompatibleWithPlan(Plan $newPlan): array
+    {
+        $issues = [];
+
+        $newUserLimit = $newPlan->getLimit('users');
+        if ($newUserLimit !== -1) {
+            $currentUserCount = $this->users()->count();
+            if ($currentUserCount > $newUserLimit) {
+                $usersToRemove = $currentUserCount - $newUserLimit;
+                $issues[] = "Deve remover {$usersToRemove} utilizador(es) antes de mudar para este plano (limite: {$newUserLimit}, atual: {$currentUserCount})";
+            }
+        }
+
+        return [
+            'compatible' => empty($issues),
+            'issues' => $issues,
+        ];
+    }
 }

@@ -18,6 +18,11 @@
                             <a href="{{ route('tenants.index') }}" class="text-gray-700 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
                                 Tenants
                             </a>
+                            @if(tenant())
+                                <a href="{{ route('subscriptions.index') }}" class="text-gray-700 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
+                                    Planos
+                                </a>
+                            @endif
                         </div>
                     @endauth
                 </div>

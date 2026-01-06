@@ -14,6 +14,8 @@
             <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Nome</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Plano</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Utilizadores</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Slug</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Estado</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Ações</th>
@@ -40,11 +42,42 @@
                                 @endif
                             @endif
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @php
+                                $plan = $tenant->currentPlan();
+                            @endphp
+                            @if($plan)
+                                <span class="px-2 py-1 text-xs font-semibold rounded {{ 
+                                    $plan->name === 'Free' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' : 
+                                    ($plan->name === 'Pro' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 
+                                    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200') 
+                                }}">
+                                    {{ $plan->name }}
+                                </span>
+                            @else
+                                <span class="text-xs text-gray-500 dark:text-gray-400">-</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                            @php
+                                $userCount = $tenant->users()->count();
+                                $plan = $tenant->currentPlan();
+                                $limit = $plan ? $plan->getLimit('users') : 0;
+                            @endphp
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium">{{ $userCount }}</span>
+                                @if($limit !== -1)
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">/ {{ $limit }}</span>
+                                @else
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">/ ∞</span>
+                                @endif
+                            </div>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             {{ $tenant->slug }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 text-xs rounded-full {{ $tenant->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                            <span class="px-2 py-1 text-xs rounded-full {{ $tenant->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' }}">
                                 {{ $tenant->is_active ? 'Ativo' : 'Inativo' }}
                             </span>
                         </td>
@@ -72,7 +105,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">Nenhum tenant encontrado.</td>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Nenhum tenant encontrado.</td>
                     </tr>
                 @endforelse
             </tbody>

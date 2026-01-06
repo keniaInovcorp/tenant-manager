@@ -4,10 +4,18 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Utilizadores - {{ $tenant->name }}</h1>
-        @if($tenant->canManageUsers(Auth::user()))
+        @if($tenant->canManageUsers(Auth::user()) && $tenant->canAddUsers())
             <a href="{{ route('tenants.users.create', $tenant) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
                 + Adicionar Utilizador
             </a>
+        @elseif($tenant->canManageUsers(Auth::user()) && !$tenant->canAddUsers())
+            @php
+                $plan = $tenant->currentPlan();
+                $limit = $plan ? $plan->getLimit('users') : 0;
+            @endphp
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+                Limite de utilizadores atingido ({{ $limit }}). <a href="{{ route('subscriptions.index') }}" class="text-blue-600 hover:underline">Fazer upgrade</a>
+            </div>
         @endif
     </div>
 

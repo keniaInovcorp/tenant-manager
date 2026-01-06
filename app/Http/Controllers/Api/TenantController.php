@@ -33,10 +33,12 @@ class TenantController extends Controller
 
         $allTenants = $ownedTenants->merge($associatedTenants)->unique('id')->values();
         $tenants = $allTenants->map(function ($tenant) {
+            $subscription = $tenant->subscription;
             return [
                 'id' => $tenant->id,
                 'name' => $tenant->name,
                 'slug' => $tenant->slug,
+                'plan' => $subscription ? $subscription->plan->name : null,
             ];
         });
 
@@ -45,6 +47,7 @@ class TenantController extends Controller
             'id' => $currentTenant->id,
             'name' => $currentTenant->name,
             'slug' => $currentTenant->slug,
+            'plan' => $currentTenant->subscription ? $currentTenant->subscription->plan->name : null,
         ] : null;
 
         return response()->json([

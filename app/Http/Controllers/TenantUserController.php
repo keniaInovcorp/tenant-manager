@@ -44,11 +44,18 @@ class TenantUserController extends Controller
      * Show the form for creating a new tenant user.
      *
      * @param Tenant $tenant
-     * @return View
+     * @return View|RedirectResponse
      */
-    public function create(Tenant $tenant): View
+    public function create(Tenant $tenant): View|RedirectResponse
     {
         $this->authorize('manageUsers', $tenant);
+
+        if (!$tenant->canAddUsers()) {
+            $plan = $tenant->currentPlan();
+            $limit = $plan ? $plan->getLimit('users') : 0;
+            return redirect()->route('tenants.users.index', $tenant)
+                ->with('error', "Limite de utilizadores atingido ({$limit}). Faça upgrade do plano para adicionar mais utilizadores.");
+        }
 
         // Get all user IDs already associated with this tenant
         $associatedUserIds = $tenant->users()->pluck('user_id')->toArray();
@@ -56,7 +63,6 @@ class TenantUserController extends Controller
             $associatedUserIds[] = $tenant->owner_id;
         }
 
-        // Get users not yet associated with this tenant
         $availableUsers = User::whereNotIn('id', array_unique($associatedUserIds))->get();
 
         return view('tenants.users.create', compact('tenant', 'availableUsers'));
@@ -72,6 +78,13 @@ class TenantUserController extends Controller
     public function store(Request $request, Tenant $tenant): RedirectResponse
     {
         $this->authorize('manageUsers', $tenant);
+
+        if (!$tenant->canAddUsers()) {
+            $plan = $tenant->currentPlan();
+            $limit = $plan ? $plan->getLimit('users') : 0;
+            return redirect()->route('tenants.users.index', $tenant)
+                ->with('error', "Limite de utilizadores atingido ({$limit}). Faça upgrade do plano para adicionar mais utilizadores.");
+        }
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',

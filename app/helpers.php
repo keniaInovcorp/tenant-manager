@@ -8,7 +8,7 @@ if (!function_exists('tenant')) {
      */
     function tenant(): ?Tenant
     {
-        return app('tenant');
+        return app()->bound('tenant') ? app('tenant') : null;
     }
 }
 

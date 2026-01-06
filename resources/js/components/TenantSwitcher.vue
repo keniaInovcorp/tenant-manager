@@ -33,15 +33,25 @@
               : 'hover:bg-gray-700'
           ]"
         >
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="font-medium text-white">{{ tenant.name }}</div>
-              <div class="text-xs text-gray-400">{{ tenant.slug }}</div>
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 flex-1">
+              <span v-if="tenant.plan" :class="[
+                'px-2 py-0.5 text-xs font-semibold rounded',
+                tenant.plan === 'Free' ? 'bg-gray-600 text-gray-200' : '',
+                tenant.plan === 'Pro' ? 'bg-blue-600 text-white' : '',
+                tenant.plan === 'Enterprise' ? 'bg-purple-600 text-white' : ''
+              ]">
+                {{ tenant.plan }}
+              </span>
+              <div class="flex-1">
+                <div class="font-medium text-white">{{ tenant.name }}</div>
+                <div class="text-xs text-gray-400">{{ tenant.slug }}</div>
+              </div>
             </div>
             <svg
               v-if="currentTenant?.id === tenant.id"
               xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 text-blue-300"
+              class="h-5 w-5 text-blue-300 flex-shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

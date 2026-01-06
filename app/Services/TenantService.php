@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,15 @@ use Illuminate\Support\Str;
  */
 class TenantService
 {
+    /**
+     * Create a new TenantService instance.
+     *
+     * @param SubscriptionService $subscriptionService
+     */
+    public function __construct(
+        protected SubscriptionService $subscriptionService
+    ) {}
+
     /**
      * Create a new tenant with the given owner and data.
      *
@@ -37,7 +47,12 @@ class TenantService
                 'permissions' => json_encode(['*']),
             ]);
 
-            return $tenant->fresh(['owner', 'users']);
+            $freePlan = Plan::where('slug', 'free')->first();
+            if ($freePlan) {
+                $this->subscriptionService->subscribe($tenant, $freePlan);
+            }
+
+            return $tenant->fresh(['owner', 'users', 'subscription']);
         });
     }
 
