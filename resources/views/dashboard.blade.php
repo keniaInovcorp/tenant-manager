@@ -5,16 +5,18 @@
     <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Dashboard</h1>
 
     @if($tenant)
-        <div class="mb-6 bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Tenant Ativo: {{ $tenant->name }}</h2>
+        @php
+            $brandColor = $tenant->settings['branding']['primary_color'] ?? '#3B82F6';
+        @endphp
+        <div class="mb-6 bg-white dark:bg-gray-800 shadow rounded-lg p-6 border-l-4 border-gray-200 dark:border-gray-700" style="border-left-color: {{ $brandColor }};">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                <span style="color: {{ $brandColor }};">●</span> Tenant Ativo: {{ $tenant->name }}
+            </h2>
             @if($plan)
                 <div class="space-y-2">
                     <p class="text-gray-700 dark:text-gray-300">
                         Plano:
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full
-                            {{ $plan->name === 'Free' ? 'bg-gray-600 text-white' : '' }}
-                            {{ $plan->name === 'Pro' ? 'bg-blue-600 text-white' : '' }}
-                            {{ $plan->name === 'Enterprise' ? 'bg-purple-600 text-white' : '' }}">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full text-white" style="background-color: {{ $brandColor }};">
                             {{ $plan->name }}
                         </span>
                     </p>
@@ -39,8 +41,10 @@
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Utilização de Recursos</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @foreach($usage as $feature => $data)
-                        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 capitalize">{{ str_replace('_', ' ', $feature) }}</h3>
+                        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border-l-4 border-gray-200 dark:border-gray-700" style="border-left-color: {{ $brandColor }};">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 capitalize">
+                                <span style="color: {{ $brandColor }};">●</span> {{ str_replace('_', ' ', $feature) }}
+                            </h3>
                             <div class="mb-2">
                                 <div class="flex justify-between mb-2">
                                     <span class="text-sm text-gray-600 dark:text-gray-400">Utilizado</span>
@@ -51,11 +55,11 @@
                                 @if($data['limit'] > 0)
                                     @php
                                         $percentage = min(100, ($data['used'] / $data['limit']) * 100);
-                                        $barColor = $percentage >= 90 ? 'bg-red-600' : ($percentage >= 75 ? 'bg-yellow-600' : 'bg-blue-600');
+                                        $progressColor = $percentage >= 90 ? '#DC2626' : ($percentage >= 75 ? '#D97706' : $brandColor);
                                     @endphp
                                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                        <div class="{{ $barColor }} h-2.5 rounded-full transition-all duration-300"
-                                             style="width: {{ $percentage }}%"></div>
+                                        <div class="h-2.5 rounded-full transition-all duration-300"
+                                             style="width: {{ $percentage }}%; background-color: {{ $progressColor }};"></div>
                                     </div>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
                                         Restam: <strong class="text-gray-900 dark:text-white">{{ $data['remaining'] }}</strong>
@@ -89,7 +93,7 @@
                                                     viewBox="0 0 20 20"
                                                     fill="currentColor">
                                                     <path fill-rule="evenodd"
-                                                        d="M8.257 3.099c.765-1.36 2.72-1.36 3.485 0l6.518 11.59c.75 1.334-.213 2.99-1.742 2.99H3.48c-1.53 0-2.492-1.656-1.742-2.99L8.257 3.1z"
+                                                        d="M8.257 3.099c.765-1.36 2.72-1.36 3.485 0l6.518 11.59c.75 1.334-.213 2.99-1.742 2.99H3.48c-1.53 0-2.492-1.656-1.742-2.99L8.257 3.1zM11 14a1 1 0 10-2 0 1 1 0 002 0zm-1-7a1 1 0 00-.993.883L9 8v4a1 1 0 001.993.117L11 12V8a1 1 0 00-1-1z"
                                                         clip-rule="evenodd" />
                                                 </svg>
 
@@ -112,10 +116,10 @@
             </div>
 
             <div class="flex justify-center gap-4">
-                <a href="{{ route('subscriptions.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium">
+                <a href="{{ route('subscriptions.index') }}" class="text-white px-6 py-3 rounded-lg transition-all font-medium hover:opacity-90 shadow-md" style="background-color: {{ $brandColor }};">
                     Ver Planos Disponíveis
                 </a>
-                <a href="{{ route('tenants.users.index', $tenant) }}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors font-medium">
+                <a href="{{ route('tenants.users.index', $tenant) }}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors font-medium shadow-md">
                     Gerir Utilizadores
                 </a>
             </div>

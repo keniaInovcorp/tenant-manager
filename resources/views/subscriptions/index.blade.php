@@ -7,9 +7,19 @@
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Planos de Subscrição</h1>
             <p class="text-gray-600 dark:text-gray-400">Escolha o plano ideal para o seu tenant</p>
         </div>
-        <a href="{{ route('tenants.index') }}" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-            Voltar
-        </a>
+        <div class="flex gap-2">
+            @if($currentTenant)
+                <a href="{{ route('subscriptions.logs') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Histórico
+                </a>
+            @endif
+            <a href="{{ route('tenants.index') }}" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+                Voltar
+            </a>
+        </div>
     </div>
 
     <div>

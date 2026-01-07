@@ -27,6 +27,7 @@ class Subscription extends Model
         'starts_at',
         'ends_at',
         'trial_ends_at',
+        'trial_notification_sent',
         'cancelled_at',
     ];
 
@@ -39,6 +40,7 @@ class Subscription extends Model
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
         'trial_ends_at' => 'datetime',
+        'trial_notification_sent' => 'boolean',
         'cancelled_at' => 'datetime',
     ];
 

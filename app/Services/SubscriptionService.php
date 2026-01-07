@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\Plan;
 use App\Models\Subscription;
+use App\Models\SubscriptionLog;
 use App\Models\Tenant;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -19,11 +21,12 @@ class SubscriptionService
      * @param Tenant $tenant
      * @param Plan $plan
      * @param Carbon|null $startDate
+     * @param bool $shouldLog
      * @return Subscription
      */
-    public function subscribe(Tenant $tenant, Plan $plan, $startDate = null): Subscription
+    public function subscribe(Tenant $tenant, Plan $plan, $startDate = null, bool $shouldLog = true): Subscription
     {
-        return DB::transaction(function () use ($tenant, $plan, $startDate) {
+        return DB::transaction(function () use ($tenant, $plan, $startDate, $shouldLog) {
             $startDate = $startDate ?? now();
             $trialEndDate = $plan->trial_days > 0 ? $startDate->copy()->addDays($plan->trial_days) : null;
             
@@ -35,9 +38,10 @@ class SubscriptionService
                 $endDate = $this->calculateEndDate($startDate, $plan->billing_period);
             }
 
-            $tenant->subscription()?->update(['status' => 'cancelled']);
+            $oldSubscription = $tenant->subscription;
+            $oldSubscription?->update(['status' => 'cancelled']);
 
-            return Subscription::create([
+            $subscription = Subscription::create([
                 'tenant_id' => $tenant->id,
                 'plan_id' => $plan->id,
                 'status' => 'active',
@@ -45,6 +49,19 @@ class SubscriptionService
                 'ends_at' => $endDate,
                 'trial_ends_at' => $trialEndDate,
             ]);
+
+            if ($shouldLog) {
+                $this->logSubscriptionChange(
+                    $tenant,
+                    $subscription,
+                    $oldSubscription?->plan,
+                    $plan,
+                    'subscribed',
+                    $plan->trial_days > 0 ? 'Subscreveu ao plano com trial de ' . $plan->trial_days . ' dias' : 'Subscreveu ao plano'
+                );
+            }
+
+            return $subscription;
         });
     }
 
@@ -70,8 +87,20 @@ class SubscriptionService
             $newPlanAmount = $newPlan->price;
             $amountToCharge = max(0, $newPlanAmount - $proratedAmount);
 
+            $oldPlan = $currentSubscription->plan;
             $currentSubscription->update(['status' => 'cancelled']);
-            return $this->subscribe($tenant, $newPlan, now());
+            $newSubscription = $this->subscribe($tenant, $newPlan, now(), false);
+
+            $this->logSubscriptionChange(
+                $tenant,
+                $newSubscription,
+                $oldPlan,
+                $newPlan,
+                'upgraded',
+                "Upgrade de {$oldPlan->name} para {$newPlan->name}. Valor pró-rata cobrado: €" . number_format($amountToCharge, 2)
+            );
+
+            return $newSubscription;
         });
     }
 
@@ -91,8 +120,20 @@ class SubscriptionService
                 return $this->subscribe($tenant, $newPlan);
             }
 
+            $oldPlan = $currentSubscription->plan;
             $currentSubscription->update(['status' => 'cancelled']);
-            return $this->subscribe($tenant, $newPlan, now());
+            $newSubscription = $this->subscribe($tenant, $newPlan, now(), false);
+
+            $this->logSubscriptionChange(
+                $tenant,
+                $newSubscription,
+                $oldPlan,
+                $newPlan,
+                'downgraded',
+                "Downgrade de {$oldPlan->name} para {$newPlan->name}"
+            );
+
+            return $newSubscription;
         });
     }
 
@@ -110,6 +151,44 @@ class SubscriptionService
             'yearly' => $startDate->copy()->addYear(),
             default => $startDate->copy()->addMonth(),
         };
+    }
+
+    /**
+     * Log a subscription change for audit purposes.
+     *
+     * @param Tenant $tenant
+     * @param Subscription $subscription
+     * @param Plan|null $oldPlan
+     * @param Plan $newPlan
+     * @param string $action
+     * @param string|null $notes
+     * @return void
+     */
+    protected function logSubscriptionChange(
+        Tenant $tenant,
+        Subscription $subscription,
+        ?Plan $oldPlan,
+        Plan $newPlan,
+        string $action,
+        ?string $notes = null
+    ): void {
+        SubscriptionLog::create([
+            'tenant_id' => $tenant->id,
+            'user_id' => Auth::id(),
+            'subscription_id' => $subscription->id,
+            'old_plan_id' => $oldPlan?->id,
+            'new_plan_id' => $newPlan->id,
+            'action' => $action,
+            'old_price' => $oldPlan?->price,
+            'new_price' => $newPlan->price,
+            'notes' => $notes,
+            'metadata' => [
+                'old_plan_name' => $oldPlan?->name,
+                'new_plan_name' => $newPlan->name,
+                'trial_days' => $newPlan->trial_days,
+                'billing_period' => $newPlan->billing_period,
+            ],
+        ]);
     }
 }
 

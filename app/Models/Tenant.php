@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
@@ -181,6 +182,16 @@ class Tenant extends Model
     public function currentPlan(): ?Plan
     {
         return $this->subscription?->plan;
+    }
+
+    /**
+     * Get all subscription logs for this tenant.
+     *
+     * @return HasMany
+     */
+    public function subscriptionLogs(): HasMany
+    {
+        return $this->hasMany(SubscriptionLog::class);
     }
 
     /**

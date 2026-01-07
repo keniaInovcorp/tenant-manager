@@ -15,9 +15,6 @@
                     <a href="/" class="text-xl font-bold text-gray-900 dark:text-white">Tenant Manager</a>
                     @auth
                         <div class="flex items-center gap-6 pl-8">
-                            <a href="{{ route('dashboard') }}" class="text-gray-700 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
-                                Dashboard
-                            </a>
                             <a href="{{ route('tenants.index') }}" class="text-gray-700 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
                                 Tenants
                             </a>

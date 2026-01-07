@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SubscriptionLogController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\TenantOnboardingController;
 use App\Http\Controllers\TenantUserController;
@@ -35,4 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/tenants/{tenant}/subscribe', [SubscriptionController::class, 'subscribe'])->name('tenants.subscribe');
     Route::post('/tenants/{tenant}/upgrade', [SubscriptionController::class, 'upgrade'])->name('tenants.upgrade');
     Route::post('/tenants/{tenant}/downgrade', [SubscriptionController::class, 'downgrade'])->name('tenants.downgrade');
+    
+    Route::get('/subscriptions/logs', [SubscriptionLogController::class, 'index'])->name('subscriptions.logs');
+    Route::get('/tenants/{tenant}/subscriptions/logs', [SubscriptionLogController::class, 'index'])->name('tenants.subscriptions.logs');
 });
