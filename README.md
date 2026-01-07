@@ -1,176 +1,153 @@
 # Tenant Manager
 
-Projeto Laravel 12 com Vue 3, TailwindCSS, Shadcn Vue e pacotes de segurança.
+Sistema abrangente de gestão multi-tenancy desenvolvido com Laravel 12, Vue 3 e tecnologias web modernas. Esta aplicação fornece gestão completa do ciclo de vida de tenants, gestão de subscrições e monitorização de recursos com segurança e isolamento integrados.
+
+## Visão Geral
+
+O Tenant Manager é uma plataforma multi-tenancy pronta para SaaS que permite às organizações gerir múltiplos tenants isolados numa única instância de aplicação. Cada tenant opera de forma independente com os seus próprios utilizadores, permissões e planos de subscrição, mantendo isolamento completo de dados.
 
 ## Stack Tecnológica
 
-- **Laravel 12** - Framework PHP
-- **Vue 3** - Framework JavaScript
-- **TailwindCSS 4** - Framework CSS
-- **Shadcn Vue** - Componentes UI
-- **MySQL** - Banco de dados
-- **Laravel Fortify** - Autenticação com 2FA
-- **Spatie Permission** - Gerenciamento de permissões
+**Backend**
+- Laravel 12.x
+- PHP 8.3+
+- MySQL 8.0+
 
-## Instalação
+**Frontend**
+- Vue 3 (Composition API)
+- TailwindCSS 3.x
+- Vite
 
-### 1. Instalar dependências PHP
+**Autenticação e Autorização**
+- Laravel Fortify
+- Permissões personalizadas com âmbito de tenant
 
-```bash
-composer install
-```
+**Ferramentas Adicionais**
+- Laravel Scheduler para tarefas automatizadas
+- Laravel Notifications para comunicação por email
+- Migrations de base de dados com controlo de versão
 
-### 2. Instalar dependências Node
+## Funcionalidades Principais
 
-```bash
-npm install
-```
+### Gestão de Tenants
+Operações CRUD completas para entidades tenant incluindo criação, edição, ativação/desativação e eliminação lógica. Cada tenant possui um slug único para identificação e suporte opcional para domínio personalizado.
 
-### 3. Configurar ambiente
+### Suporte Multi-Utilizador
+Os tenants podem ter múltiplos utilizadores com diferentes funções (proprietário, administrador, membro) e permissões granulares. O sistema aplica controlo de acesso baseado em funções rigoroso dentro do âmbito de cada tenant.
 
-Copie o arquivo `.env.example` para `.env`:
+### Sistema de Subscrições
+Modelo de subscrição de três níveis com atribuição automática de plano, capacidades de upgrade/downgrade e gestão de período de trial. Inclui registo completo de auditoria de todas as alterações de subscrição.
 
-```bash
-cp .env.example .env
-```
+**Planos Disponíveis:**
+- Free: Funcionalidades básicas com limites de utilizadores e armazenamento
+- Pro: Funcionalidades profissionais com limites aumentados e trial de 14 dias
+- Enterprise: Recursos ilimitados com trial de 30 dias
 
-Configure as variáveis de ambiente no arquivo `.env`, especialmente:
+### Monitorização de Recursos
+Dashboard em tempo real exibindo utilização atual de recursos face aos limites do plano com indicadores visuais para consumo de quota. Alertas automáticos quando se aproximam dos limites de recursos.
 
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=tenant_manager
-DB_USERNAME=root
-DB_PASSWORD=sua_senha
-```
+### Onboarding Self-Service
+Processo simplificado de criação de tenant permitindo aos utilizadores estabelecer novos tenants com atribuição automática de proprietário e subscrição do plano gratuito por defeito.
 
-### 4. Gerar chave da aplicação
+### Notificações de Trial
+Notificações automáticas por email enviadas um dia antes da expiração do trial, agendadas diariamente através do task scheduler do Laravel com mecanismos de prevenção de duplicação.
 
-```bash
-php artisan key:generate
-```
+### Registo de Auditoria
+Histórico abrangente de alterações de subscrição rastreando quem fez alterações, quando e o que foi modificado. Inclui valores antigos e novos para transparência completa.
 
-### 5. Executar migrations
+## Arquitetura
 
-```bash
-php artisan migrate
-```
+### Isolamento de Dados
+O sistema implementa multi-tenancy ao nível de linha usando uma abordagem de base de dados partilhada com restrições de chave estrangeira rigorosas e contexto de tenant aplicado por middleware.
 
-### 6. Compilar assets
+### Contexto de Tenant
+O middleware vincula automaticamente o tenant ativo ao container da aplicação com base em dados de sessão, tornando-o disponível ao longo do ciclo de vida do pedido através de funções helper.
 
-```bash
-npm run build
-```
-
-Ou para desenvolvimento com hot reload:
-
-```bash
-npm run dev
-```
+### Camada de Serviço
+A lógica de negócio está encapsulada em classes de serviço dedicadas, separando responsabilidades dos controllers e promovendo reutilização e testabilidade do código.
 
 ## Estrutura do Projeto
 
-```
-tenant-manager/
-├── app/
-│   ├── Actions/
-│   │   └── Fortify/          # Ações do Fortify
-│   ├── Models/
-│   │   └── User.php          # Model User com traits
-│   └── Providers/
-│       └── FortifyServiceProvider.php
-├── config/
-│   ├── fortify.php           # Configuração do Fortify (2FA habilitado)
-│   └── permission.php        # Configuração do Spatie Permission
-├── database/
-│   └── migrations/           # Migrations incluindo Fortify e Permission
-├── resources/
-│   ├── js/
-│   │   ├── App.vue           # Componente principal Vue
-│   │   ├── app.js            # Entry point Vue
-│   │   └── lib/
-│   │       └── utils.js      # Utilitários Shadcn Vue
-│   ├── css/
-│   │   └── app.css           # Estilos TailwindCSS
-│   └── views/
-│       └── app.blade.php     # View principal
-└── routes/
-    └── web.php               # Rotas da aplicação
-```
+### Models
+- **Tenant**: Entidade principal de tenant com relações para utilizadores e subscrições
+- **User**: Utilizadores da aplicação com relações many-to-many para tenants
+- **Plan**: Definições de planos de subscrição com funcionalidades e limites
+- **Subscription**: Subscrições ativas ligando tenants a planos
+- **SubscriptionLog**: Trilha de auditoria de alterações de subscrição
 
-## Funcionalidades Configuradas
+### Controllers
+- **TenantController**: Operações CRUD de tenants
+- **TenantUserController**: Gestão de utilizadores dentro do âmbito do tenant
+- **SubscriptionController**: Subscrição e alterações de planos
+- **SubscriptionLogController**: Visualização de histórico de subscrições
+- **DashboardController**: Monitorização de recursos e estatísticas
 
-### Laravel Fortify (2FA)
+### Services
+- **TenantService**: Lógica de criação e gestão de tenants
+- **SubscriptionService**: Gestão do ciclo de vida de subscrições
 
-- Autenticação completa configurada
-- Two-Factor Authentication (2FA) habilitado
-- Features disponíveis:
-  - Registro de usuários
-  - Reset de senha
-  - Verificação de email
-  - Atualização de perfil
-  - Atualização de senha
-  - Autenticação de dois fatores
+### Middleware
+- **SetTenantContext**: Estabelece âmbito de tenant para pedidos
+- **CheckTenantAccess**: Valida acesso do utilizador aos recursos do tenant
 
-### Spatie Permission
+### Policies
+- **TenantPolicy**: Regras de autorização para operações de tenant
+- **Aplica permissões de proprietário/administrador para ações sensíveis
 
-- Gerenciamento de roles e permissões
-- Trait `HasRoles` adicionado ao modelo User
-- Migrations publicadas
+## Conceitos-Chave
 
-## Comandos Úteis
+### Permissões com Âmbito de Tenant
+As permissões são avaliadas dentro do contexto de um tenant específico. Um utilizador pode ter direitos de administrador num tenant enquanto é um membro básico noutro.
 
-### Desenvolvimento
+### Atribuição Automática de Plano
+Novos tenants são automaticamente subscritos ao plano Free após criação, garantindo acesso imediato sem intervenção manual.
 
-```bash
-# Iniciar servidor Laravel
-php artisan serve
+### Transições de Subscrição
+Upgrades e downgrades são aplicados imediatamente para todas as alterações de plano. O sistema valida compatibilidade antes de permitir transições.
 
-# Compilar assets em modo desenvolvimento
-npm run dev
+### Limites de Recursos
+Os planos definem limites para vários recursos (utilizadores, armazenamento). O sistema aplica estes limites em tempo real, prevenindo ações que excedam as quotas.
 
-# Compilar assets para produção
-npm run build
-```
+## Fluxo de Subscrição
 
-### Banco de Dados
+### Criação de Novo Tenant
+1. Utilizador inicia criação de tenant através do fluxo de onboarding
+2. Sistema valida input e gera slug único
+3. Registo de tenant criado com utilizador como proprietário
+4. Subscrição automática ao plano Free
+5. Entrada inicial de log de subscrição criada
+6. Utilizador redirecionado para dashboard do tenant
 
-```bash
-# Executar migrations
-php artisan migrate
+### Alterações de Plano
+1. Utilizador seleciona novo plano das opções disponíveis
+2. Sistema valida permissões do utilizador (apenas proprietário/administrador)
+3. Verificação de compatibilidade face à utilização atual de recursos
+4. Subscrição atual marcada como cancelada
+5. Nova subscrição criada com datas apropriadas
+6. Entrada de log de auditoria registada com detalhes da alteração
+7. Notificação ao utilizador de alteração bem-sucedida
 
-# Reverter última migration
-php artisan migrate:rollback
+### Expiração de Trial
+1. Tarefa agendada diária verifica trials a expirar em 24 horas
+2. Sistema identifica subscrições que requerem notificação
+3. Email enviado ao proprietário do tenant com detalhes do trial
+4. Subscrição continua como paga após fim do trial
 
-# Criar nova migration
-php artisan make:migration nome_da_migration
-```
+## Componentes UI
 
-### Permissões
+### Dashboard
+Hub central exibindo informação do tenant ativo, status de subscrição atual e métricas de utilização de recursos com indicadores de progresso visuais.
 
-```bash
-# Criar role
-php artisan tinker
->>> $role = Spatie\Permission\Models\Role::create(['name' => 'admin']);
+### Tenant Switcher
+Componente Vue permitindo aos utilizadores alternar entre tenants aos quais têm acesso, atualizando o contexto de sessão dinamicamente.
 
-# Atribuir role a usuário
->>> $user->assignRole('admin');
-```
+### Vista de Planos de Subscrição
+Layout responsivo de cards apresentando planos disponíveis com funcionalidades, preços, informação de trial e botões de ação baseados em permissões do utilizador e compatibilidade.
 
-## Próximos Passos
+### Histórico de Subscrições
+Tabela paginada de todas as alterações de subscrição com tipos de ação codificados por cor, transições de plano e diferenças de preço.
 
-1. Configurar o banco de dados MySQL
-2. Executar as migrations
-3. Criar o primeiro usuário
-4. Configurar roles e permissões iniciais
-5. Começar a desenvolver as funcionalidades do Tenant Manager
 
-## Documentação
+## Licença
 
-- [Laravel 12](https://laravel.com/docs/12.x)
-- [Vue 3](https://vuejs.org/)
-- [TailwindCSS](https://tailwindcss.com/)
-- [Shadcn Vue](https://www.shadcn-vue.com/)
-- [Laravel Fortify](https://laravel.com/docs/fortify)
-- [Spatie Permission](https://spatie.be/docs/laravel-permission)
+ste projeto foi desenvolvido em contexto académico(estágio).
